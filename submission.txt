@@ -1,0 +1,46 @@
+﻿Griddy Engineering Take Home (Payment Service) Submission
+=====
+
+Question:
+We’d like to run this system at scale to support hundreds of thousands of simultaneous Griddy debiting events and user read operations across multiple nodes. What are some limitations of your existing implementation and how could they be improved upon in upcoming iterations?
+
+
+Response:
+Currently the database is SQLite, which uses a single file stored along with the application. 
+If we were to spin up multiple instances of this server then each one would have a separate db.
+In order to maintain consistency across nodes we would want to use some kind of separately hosted db, preferably cloud connected.
+This would also decouple our db from our server, increasing the robustness of the whole system.
+
+Another limitation of my solution is that every request requires the server to hit both the database AND the Stripe API.
+This is because I decided that the Stripe customer id is different from the "account_id" (which I discuss in the next section).
+My server has to check the SQL db for the Stripe customer id before making a call to the Stripe API.
+A better solution would be to store the Stripe id on the front end.
+That way, when a client makes a request they can just send along their Stripe id and the server can use that to immediately query the API.
+Just saves some load on the server.
+
+
+
+Open Questions:
+List of unresolved implementation questions. Please only fill in (in the submission response file) if relevant.
+
+
+Response:
+I wasn't sure if the "account_id" was the same as the id that Stripe creates for customers.
+I decided that they would be different, and my implementation reflects this.
+The reason I chose to use different ids is that I can imagine the Griddy account_id has many more uses than just processing payments.
+For that purpose it might be helpful to keep the Griddy account_id distinct from the Stripe id.
+Also, if Stripe changes their implementation for whatever reason it won't mess up the entire Griddy system.
+
+The other thing that wasn't clear is how I should handle account_ids that don't exist.
+I decided to make a new account in my users table whenever someone hits the POST /payments endpoint.
+
+
+
+Feedback:
+Let us know what you liked, or didn’t like about this experience? Was the take-home in line with your expectations? Would you ask that we would have done anything differently?
+
+
+Response:
+I liked this take-home. I thought it was challenging yet fair. 
+I just would have liked a bit more clarification regarding the things I mentioned in the previous section.
+Other than that I thought it was a good test 👍🏻
